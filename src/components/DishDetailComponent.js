@@ -6,6 +6,7 @@ import {
 import { Link } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { Control, LocalForm, Errors } from 'react-redux-form';
+import { Loading } from './LoadingComponent';
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -77,8 +78,8 @@ class CommentForm extends Component {
                                         placeholder="Your Name"
                                         className="form-control"
                                         validators={{
-                                            required, 
-                                            minLength: minLength(3), 
+                                            required,
+                                            minLength: minLength(3),
                                             maxLength: maxLength(15)
                                         }}
                                     />
@@ -142,7 +143,7 @@ function RenderDish({ dish }) {
         );
 }
 
-function RenderComments({comments, addComment, dishId }) {
+function RenderComments({ comments, addComment, dishId }) {
     if (comments != null) {
         const comm = comments.map((comment) => {
             return (
@@ -175,39 +176,54 @@ function RenderComments({comments, addComment, dishId }) {
 }
 
 const DishDetail = (props) => {
-    const dish = props.dish;
+    // const dish = props.dish;
 
-    console.log(dish);
+    console.log(props.dish);
 
-    if (dish == null) {
-        return (<div></div>);
+    if (props.isLoading) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Loading />
+                </div>
+            </div>
+        );
     }
-
-    return (
-        <div className='container'>
-            <div className="row">
-                <Breadcrumb>
-                    <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
-                    <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-                </Breadcrumb>
-                <div className="col-12">
-                    <h3>{props.dish.name}</h3>
-                    <hr />
+    else if (props.errMess) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <h4>{props.errMess}</h4>
                 </div>
             </div>
-            <div className='row'>
-                <div className="col-12 col-md-5 m-1">
-                    <RenderDish dish={props.dish} />
+        );
+    }
+    else if (props.dish != null)
+        return (
+            <div className='container'>
+                <div className="row">
+                    <Breadcrumb>
+                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
+                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+                    </Breadcrumb>
+                    <div className="col-12">
+                        <h3>{props.dish.name}</h3>
+                        <hr />
+                    </div>
                 </div>
-                <div className="col-12 col-md-5 m-1">
-                    <h4> Comments </h4>
-                    <RenderComments comments={props.comments} addComment={props.addComment}
-        dishId={props.dish.id} />
+                <div className='row'>
+                    <div className="col-12 col-md-5 m-1">
+                        <RenderDish dish={props.dish} />
+                    </div>
+                    <div className="col-12 col-md-5 m-1">
+                        <h4> Comments </h4>
+                        <RenderComments comments={props.comments} addComment={props.addComment}
+                            dishId={props.dish.id} />
+                    </div>
+                    {/* <RenderComments comments={props.dish.comments} /> */}
                 </div>
-                {/* <RenderComments comments={props.dish.comments} /> */}
             </div>
-        </div>
-    )
+        )
 }
 
 export default DishDetail;

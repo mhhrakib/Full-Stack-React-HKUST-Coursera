@@ -8,10 +8,137 @@ import { Button, Row, Col, Label } from 'reactstrap';
 import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Loading } from './LoadingComponent';
 import { baseUrl } from '../shared/baseUrl';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
 const minLength = (len) => (val) => val && (val.length >= len);
+
+function RenderDish({ dish }) {
+    if (dish != null)
+        return (
+            <FadeTransform
+                in
+                transformProps={{
+                    exitTransform: 'scale(0.5) translateY(-50%)'
+                }}>
+                <Card>
+                    <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+                    <CardBody>
+                        <CardTitle>{dish.name}</CardTitle>
+                        <CardText>{dish.description}</CardText>
+                    </CardBody>
+                </Card>
+            </FadeTransform>
+        );
+    else
+        return (
+            <div></div>
+        );
+}
+
+function RenderComments({ comments, postComment, dishId }) {
+    if (comments != null) {
+        // const comm = <Stagger in> {comments.map((comment) => {
+        //     return (
+        //         <li key={comment.id}>
+        //             <p>{comment.comment}</p>
+        //             <p>-- {comment.author},
+        //             &nbsp;
+        //             {new Intl.DateTimeFormat('en-US', {
+        //                 year: 'numeric',
+        //                 month: 'short',
+        //                 day: '2-digit'
+        //             }).format(new Date(comment.date))}
+        //             </p>
+        //         </li>
+        //     )
+        // })} </Stagger>;
+
+        return (
+            <div>
+                {/* <ul className='list-unstyled'>{comm}</ul> */}
+                <ul className='list-unstyled'>
+                    <Stagger in>
+                        {comments.map((comment) => {
+                            return (
+                                <li key={comment.id}>
+                                    <p>{comment.comment}</p>
+                                    <p>-- {comment.author},
+                                    &nbsp;
+                                    {new Intl.DateTimeFormat('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: '2-digit'
+                                    }).format(new Date(comment.date))}
+                                    </p>
+                                </li>
+                            )
+                        })}
+                    </Stagger>;
+                </ul>
+
+                <CommentForm dishId={dishId} postComment={postComment} />
+            </div>
+        )
+    }
+    else {
+        return (
+            <div></div>
+        )
+    }
+}
+
+const DishDetail = (props) => {
+    // const dish = props.dish;
+
+    console.log(props.dish);
+
+    if (props.isLoading) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Loading />
+                </div>
+            </div>
+        );
+    }
+    else if (props.errMess) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <h4>{props.errMess}</h4>
+                </div>
+            </div>
+        );
+    }
+    else if (props.dish != null)
+        return (
+            <div className='container'>
+                <div className="row">
+                    <Breadcrumb>
+                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
+                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+                    </Breadcrumb>
+                    <div className="col-12">
+                        <h3>{props.dish.name}</h3>
+                        <hr />
+                    </div>
+                </div>
+                <div className='row'>
+                    <div className="col-12 col-md-5 m-1">
+                        <RenderDish dish={props.dish} />
+                    </div>
+                    <div className="col-12 col-md-5 m-1">
+                        <h4> Comments </h4>
+                        <RenderComments comments={props.comments} postComment={props.postComment}
+                            dishId={props.dish.id} />
+                    </div>
+                    {/* <RenderComments comments={props.dish.comments} /> */}
+                </div>
+            </div>
+        )
+}
 
 class CommentForm extends Component {
     constructor(props) {
@@ -124,107 +251,6 @@ class CommentForm extends Component {
             </div>
         )
     }
-}
-
-
-function RenderDish({ dish }) {
-    if (dish != null)
-        return (
-            <Card>
-                <CardImg top src={baseUrl + dish.image} alt={dish.name} />
-                <CardBody>
-                    <CardTitle>{dish.name}</CardTitle>
-                    <CardText>{dish.description}</CardText>
-                </CardBody>
-            </Card>
-        );
-    else
-        return (
-            <div></div>
-        );
-}
-
-function RenderComments({ comments, postComment, dishId }) {
-    if (comments != null) {
-        const comm = comments.map((comment) => {
-            return (
-                <li key={comment.id}>
-                    <p>{comment.comment}</p>
-                    <p>-- {comment.author},
-                    &nbsp;
-                    {new Intl.DateTimeFormat('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: '2-digit'
-                    }).format(new Date(comment.date))}
-                    </p>
-                </li>
-            )
-        });
-
-        return (
-            <div>
-                <ul className='list-unstyled'>{comm}</ul>
-                <CommentForm dishId={dishId} postComment={postComment} />
-            </div>
-        )
-    }
-    else {
-        return (
-            <div></div>
-        )
-    }
-}
-
-const DishDetail = (props) => {
-    // const dish = props.dish;
-
-    console.log(props.dish);
-
-    if (props.isLoading) {
-        return (
-            <div className="container">
-                <div className="row">
-                    <Loading />
-                </div>
-            </div>
-        );
-    }
-    else if (props.errMess) {
-        return (
-            <div className="container">
-                <div className="row">
-                    <h4>{props.errMess}</h4>
-                </div>
-            </div>
-        );
-    }
-    else if (props.dish != null)
-        return (
-            <div className='container'>
-                <div className="row">
-                    <Breadcrumb>
-                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
-                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-                    </Breadcrumb>
-                    <div className="col-12">
-                        <h3>{props.dish.name}</h3>
-                        <hr />
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className="col-12 col-md-5 m-1">
-                        <RenderDish dish={props.dish} />
-                    </div>
-                    <div className="col-12 col-md-5 m-1">
-                        <h4> Comments </h4>
-                        <RenderComments comments={props.comments} postComment={props.postComment}
-                            dishId={props.dish.id} />
-                    </div>
-                    {/* <RenderComments comments={props.dish.comments} /> */}
-                </div>
-            </div>
-        )
 }
 
 export default DishDetail;
